@@ -37,6 +37,8 @@
   "enter_partner_code": "パートナーコード入力",
   "partner_connected": "パートナーと連携しました！",
   "partner_disconnected": "連携を解除しました。",
+  "disconnect_success_title": "連携を解除しました",
+  "disconnect_success_desc": "共有したすべての思い出が消えてしまい、とても残念です... \nいつかまた良いご縁がありますように。",
   "error_update_nickname": "ニックネームの変更に失敗しました。",
   "error_connect_partner": "パートナー連携に失敗しました。",
   "error_disconnect_partner": "連携解除に失敗しました。",
@@ -45,5 +47,12 @@
   "disconnect_agreement": "上記の内容を確認し、同意します。",
   "disconnect_input_guide": "解除するには以下のフレーズを入力してください。",
   "disconnect_verification_phrase": "パートナーとの連携を解除します",
-  "disconnect_confirm_action": "解除する"
+  "disconnect_confirm_action": "解除する",
+  "partner_settings": "カップル設定",
+  "first_meeting_date": "付き合い始めた日",
+  "my_emoji": "マイ絵文字",
+  "select_emoji": "絵文字選択",
+  "settings_saved": "設定を保存しました。",
+  "no_partner_register": "パートナーがいません...登録してみてください！",
+  "with_partner": "{{name}}さんと"
 }

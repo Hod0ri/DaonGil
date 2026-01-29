@@ -37,6 +37,8 @@
   "enter_partner_code": "짝꿍 코드 입력",
   "partner_connected": "짝꿍과 연결되었습니다!",
   "partner_disconnected": "연결이 해제되었습니다.",
+  "disconnect_success_title": "연결이 해제되었습니다",
+  "disconnect_success_desc": "함께한 모든 추억이 사라지게 되어 너무 아쉬워요... \n언젠가 다시 좋은 인연으로 만나길 바랄게요.",
   "error_update_nickname": "닉네임 변경에 실패했습니다.",
   "error_connect_partner": "짝꿍 연결에 실패했습니다.",
   "error_disconnect_partner": "연결 해제에 실패했습니다.",
@@ -45,5 +47,12 @@
   "disconnect_agreement": "위 내용을 모두 확인하였으며, 이에 동의합니다.",
   "disconnect_input_guide": "해제를 진행하려면 아래 문구를 똑같이 입력하세요.",
   "disconnect_verification_phrase": "파트너와 연결을 끊겠습니다",
-  "disconnect_confirm_action": "해제하기"
+  "disconnect_confirm_action": "해제하기",
+  "partner_settings": "커플 설정",
+  "first_meeting_date": "우리가 처음 만난 날",
+  "my_emoji": "나의 이모지",
+  "select_emoji": "이모지 선택",
+  "settings_saved": "설정이 저장되었습니다.",
+  "no_partner_register": "파트너가 없어요...등록해보세요!",
+  "with_partner": "{{name}}님과 함께"
 }

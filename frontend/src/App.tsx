@@ -70,6 +70,17 @@ function App() {
     document.body.className = `lang-${i18n.language}`;
   }, [i18n.language]);
 
+  const calculateDDay = (dateString: string) => {
+    if (!dateString) return null;
+    const start = new Date(dateString);
+    const now = new Date();
+    start.setHours(0,0,0,0);
+    now.setHours(0,0,0,0);
+    const diffTime = now.getTime() - start.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; 
+    return diffDays;
+  };
+
   if (loading) {
     return <div className="App">Loading...</div>;
   }
@@ -168,19 +179,49 @@ function App() {
             <div className="card" style={{ maxWidth: '100%', textAlign: 'left', marginTop: '2rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                 <div>
-                  <h2 style={{ marginBottom: '0.5rem' }}>{t('welcome')}</h2>
+                  <h2 style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    {t('welcome')}
+                    <div style={{ display: 'flex', alignItems: 'center', marginLeft: '0.5rem', fontSize: '1.5rem' }}>
+                      <span>{user.emoji || '🙂'}</span>
+                      {user.partner && (
+                        <>
+                          <span style={{ fontSize: '1rem', color: '#ff6b6b', margin: '0 0.2rem' }}>❤️</span>
+                          <span>{user.partner.emoji || '🙂'}</span>
+                          <span style={{ fontSize: '1rem', color: '#666', marginLeft: '0.5rem', fontWeight: 'normal' }}>
+                            {t('with_partner', { name: user.partner.nickname })}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </h2>
                   <p style={{ color: '#666' }}>{t('app_subtitle')}</p>
                 </div>
-                <div style={{ 
-                  backgroundColor: '#FFF0F5', 
-                  padding: '0.5rem 1rem', 
-                  borderRadius: '20px', 
-                  color: '#d65a7a', 
-                  fontSize: '0.9rem',
-                  fontWeight: 'bold'
-                }}>
-                  Day 1
-                </div>
+                {user.first_meeting_date ? (
+                  <div style={{ 
+                    backgroundColor: '#FFF0F5', 
+                    padding: '0.8rem 1.5rem', 
+                    borderRadius: '24px', 
+                    color: '#d65a7a', 
+                    fontSize: '1.2rem',
+                    fontWeight: 'bold',
+                    boxShadow: '0 2px 8px rgba(214, 90, 122, 0.2)'
+                  }}>
+                    Day {calculateDDay(user.first_meeting_date)}
+                  </div>
+                ) : !user.partner ? (
+                  <div style={{
+                    backgroundColor: '#f8f9fa',
+                    padding: '0.8rem 1.2rem',
+                    borderRadius: '12px',
+                    color: '#6c757d',
+                    fontSize: '0.9rem',
+                    fontWeight: 'bold',
+                    border: '1px dashed #ced4da',
+                    cursor: 'pointer'
+                  }} onClick={() => setView('mypage')}>
+                    {t('no_partner_register')}
+                  </div>
+                ) : null}
               </div>
               
               <div style={{ marginTop: '1rem' }}>

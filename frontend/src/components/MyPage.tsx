@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 
 interface MyPageProps {
   user: any;
@@ -22,10 +24,26 @@ const MyPage: React.FC<MyPageProps> = ({ user, onUpdateUser }) => {
   const [disconnectInput, setDisconnectInput] = useState('');
   const [isAgreed, setIsAgreed] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showSaveSuccessModal, setShowSaveSuccessModal] = useState(false);
+  const [showDisconnectSuccessModal, setShowDisconnectSuccessModal] = useState(false);
+
+  // Partner Settings State
+  const [firstMeetingDate, setFirstMeetingDate] = useState<Date | null>(null);
+  const [myEmoji, setMyEmoji] = useState(user.emoji || '🙂');
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showCoupleSetupModal, setShowCoupleSetupModal] = useState(false);
+
+  const EMOJI_LIST = ["😀", "😃", "😄", "😆", "😅", "😂", "🥰", "😍", "😘", "🤪", "😎", "🤩", "🥳", "🥺", "😭", "😤", "👻", "👽", "💩", "🤖", "❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤍", "🤎", "💔", "❣️", "💕", "💞", "💓", "💗", "💖", "💘", "💝", "👧", "👦", "👩", "👨", "👵", "👴"];
 
   // Update local state when user prop changes
   useEffect(() => {
     setNewNickname(user.nickname);
+    setMyEmoji(user.emoji || '🙂');
+    if (user.first_meeting_date) {
+      setFirstMeetingDate(new Date(user.first_meeting_date));
+    } else {
+      setFirstMeetingDate(null);
+    }
   }, [user]);
 
   const handleCopyCode = () => {
@@ -70,6 +88,7 @@ const MyPage: React.FC<MyPageProps> = ({ user, onUpdateUser }) => {
       );
       onUpdateUser(res.data);
       setPartnerCode('');
+      setShowCoupleSetupModal(true); // Trigger setup modal
     } catch (err: any) {
       console.error('Failed to connect partner', err);
       if (err.response?.status === 404) {
@@ -111,9 +130,43 @@ const MyPage: React.FC<MyPageProps> = ({ user, onUpdateUser }) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       onUpdateUser(res.data);
+      setShowDisconnectModal(false);
+      setShowDisconnectSuccessModal(true);
     } catch (err) {
       console.error('Failed to disconnect', err);
       setError(t('error_disconnect_partner'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSavePartnerSettings = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const payload: any = {
+        emoji: myEmoji
+      };
+      if (firstMeetingDate) {
+        // Format as YYYY-MM-DD
+        const offset = firstMeetingDate.getTimezoneOffset() * 60000;
+        const localISOTime = (new Date(firstMeetingDate.getTime() - offset)).toISOString().slice(0, 10);
+        payload.first_meeting_date = localISOTime;
+      }
+      
+      const res = await axios.patch(
+        'http://localhost:8000/api/v1/users/me',
+        payload,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      onUpdateUser(res.data);
+      if (showCoupleSetupModal) {
+        setShowCoupleSetupModal(false);
+      }
+      setShowSaveSuccessModal(true);
+    } catch (err) {
+      console.error(err);
+      setError('Failed to save settings');
     } finally {
       setLoading(false);
     }
@@ -311,9 +364,324 @@ const MyPage: React.FC<MyPageProps> = ({ user, onUpdateUser }) => {
         )}
       </section>
 
+      {user.partner && (
+        <section style={{ marginTop: '2.5rem' }}>
+          <h3 style={{ fontSize: '1.2rem', color: 'var(--color-text)', marginBottom: '1rem' }}>{t('partner_settings')}</h3>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            {/* First Meeting Date */}
+            <div className="form-group">
+              <label>{t('first_meeting_date')}</label>
+              <div style={{ width: '100%' }}>
+                <DatePicker 
+                  selected={firstMeetingDate} 
+                  onChange={(date: Date | null) => setFirstMeetingDate(date)} 
+                  dateFormat="yyyy-MM-dd"
+                  className="form-input"
+                  placeholderText={t('select_date') || ''}
+                  wrapperClassName="date-picker-wrapper"
+                  showYearDropdown
+                  showMonthDropdown
+                  dropdownMode="select"
+                />
+              </div>
+            </div>
+
+            {/* My Emoji */}
+            <div className="form-group">
+              <label>{t('my_emoji')}</label>
+              <div style={{ position: 'relative' }}>
+                <button 
+                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                  style={{
+                    fontSize: '2rem',
+                    padding: '0.5rem 1rem',
+                    border: '1px solid #ddd',
+                    borderRadius: '12px',
+                    background: '#fff',
+                    cursor: 'pointer',
+                    width: '100%',
+                    textAlign: 'left',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                  }}
+                >
+                  <span>{myEmoji}</span>
+                  <span style={{ fontSize: '0.9rem', color: '#888' }}>{t('select_emoji')} ▼</span>
+                </button>
+                
+                {showEmojiPicker && (
+                  <>
+                  <div 
+                    style={{ position: 'fixed', top:0, left:0, right:0, bottom:0, zIndex: 9 }}
+                    onClick={() => setShowEmojiPicker(false)}
+                  />
+                  <div style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: 0,
+                    width: '100%',
+                    zIndex: 10,
+                    background: '#fff',
+                    border: '1px solid #eee',
+                    borderRadius: '12px',
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                    padding: '1rem',
+                    marginTop: '0.5rem',
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(40px, 1fr))',
+                    gap: '0.5rem',
+                    maxHeight: '200px',
+                    overflowY: 'auto'
+                  }}>
+                    {EMOJI_LIST.map(emoji => (
+                      <button
+                        key={emoji}
+                        onClick={() => {
+                          setMyEmoji(emoji);
+                          setShowEmojiPicker(false);
+                        }}
+                        style={{
+                          fontSize: '1.8rem',
+                          background: myEmoji === emoji ? '#FFF0F5' : 'none',
+                          border: myEmoji === emoji ? '2px solid #d65a7a' : 'none',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          padding: '0.25rem',
+                          aspectRatio: '1/1',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                  </>
+                )}
+              </div>
+            </div>
+            
+            <button 
+              className="btn-primary" 
+              onClick={handleSavePartnerSettings}
+              disabled={loading}
+              style={{ marginTop: '1rem' }}
+            >
+              {t('save')}
+            </button>
+          </div>
+        </section>
+      )}
+
     </motion.div>
 
-    {showDisconnectModal && (
+    {showDisconnectSuccessModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div className="card" style={{ maxWidth: '350px', width: '90%', textAlign: 'center', padding: '2rem' }}>
+            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>😢</div>
+            <h3 style={{ marginBottom: '1rem', color: 'var(--color-text)' }}>
+              {t('disconnect_success_title')}
+            </h3>
+            <p style={{ color: '#666', marginBottom: '1.5rem', whiteSpace: 'pre-line', lineHeight: '1.5' }}>
+              {t('disconnect_success_desc')}
+            </p>
+            <button 
+              className="btn-primary" 
+              onClick={() => setShowDisconnectSuccessModal(false)}
+              style={{ width: '100%', backgroundColor: '#888', borderColor: '#888' }}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showSaveSuccessModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div className="card" style={{ maxWidth: '300px', width: '90%', textAlign: 'center', padding: '2rem' }}>
+            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>✅</div>
+            <h3 style={{ marginBottom: '1.5rem', color: 'var(--color-text)' }}>
+              {t('settings_saved')}
+            </h3>
+            <button 
+              className="btn-primary" 
+              onClick={() => setShowSaveSuccessModal(false)}
+              style={{ width: '100%' }}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showCoupleSetupModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div className="card" style={{ maxWidth: '500px', width: '90%', maxHeight: '90vh', overflowY: 'auto' }}>
+            <h2 style={{ textAlign: 'center', marginBottom: '1.5rem', color: 'var(--color-primary-dark)' }}>
+              {t('partner_connected')}
+            </h2>
+            <p style={{ textAlign: 'center', marginBottom: '2rem', color: '#666' }}>
+              이제 우리만의 특별한 설정을 시작해볼까요? <br/>
+              처음 만난 날짜와 나만의 이모지를 선택해주세요!
+            </p>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              {/* First Meeting Date */}
+              <div className="form-group">
+                <label>{t('first_meeting_date')}</label>
+                <div style={{ width: '100%' }}>
+                  <DatePicker 
+                    selected={firstMeetingDate} 
+                    onChange={(date: Date | null) => setFirstMeetingDate(date)} 
+                    dateFormat="yyyy-MM-dd"
+                    className="form-input"
+                    placeholderText={t('select_date') || ''}
+                    wrapperClassName="date-picker-wrapper"
+                    showYearDropdown
+                    showMonthDropdown
+                    dropdownMode="select"
+                    popperProps={{ strategy: "fixed" }}
+                    portalId="root"
+                  />
+                </div>
+              </div>
+
+              {/* My Emoji */}
+              <div className="form-group">
+                <label>{t('my_emoji')}</label>
+                <div style={{ position: 'relative' }}>
+                  <button 
+                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                    style={{
+                      fontSize: '2rem',
+                      padding: '0.5rem 1rem',
+                      border: '1px solid #ddd',
+                      borderRadius: '12px',
+                      background: '#fff',
+                      cursor: 'pointer',
+                      width: '100%',
+                      textAlign: 'left',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between'
+                    }}
+                  >
+                    <span>{myEmoji}</span>
+                    <span style={{ fontSize: '0.9rem', color: '#888' }}>{t('select_emoji')} ▼</span>
+                  </button>
+                  
+                  {showEmojiPicker && (
+                    <>
+                    <div 
+                      style={{ position: 'fixed', top:0, left:0, right:0, bottom:0, zIndex: 1001 }}
+                      onClick={() => setShowEmojiPicker(false)}
+                    />
+                    <div style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: 0,
+                      width: '100%',
+                      zIndex: 1002,
+                      background: '#fff',
+                      border: '1px solid #eee',
+                      borderRadius: '12px',
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                      padding: '1rem',
+                      marginTop: '0.5rem',
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fill, minmax(40px, 1fr))',
+                      gap: '0.5rem',
+                      maxHeight: '200px',
+                      overflowY: 'auto'
+                    }}>
+                      {EMOJI_LIST.map(emoji => (
+                        <button
+                          key={emoji}
+                          onClick={() => {
+                            setMyEmoji(emoji);
+                            setShowEmojiPicker(false);
+                          }}
+                          style={{
+                            fontSize: '1.8rem',
+                            background: myEmoji === emoji ? '#FFF0F5' : 'none',
+                            border: myEmoji === emoji ? '2px solid #d65a7a' : 'none',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            padding: '0.25rem',
+                            aspectRatio: '1/1',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                    </>
+                  )}
+                </div>
+              </div>
+              
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                 <button 
+                  className="btn-secondary" 
+                  onClick={() => setShowCoupleSetupModal(false)}
+                  style={{ flex: 1 }}
+                >
+                  {t('cancel')}
+                </button>
+                <button 
+                  className="btn-primary" 
+                  onClick={handleSavePartnerSettings}
+                  disabled={loading}
+                  style={{ flex: 1 }}
+                >
+                  {t('save')}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDisconnectModal && (
         <div style={{
           position: 'fixed',
           top: 0,
