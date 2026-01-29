@@ -3,8 +3,11 @@ FROM node:18-alpine
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 COPY . .
 
-CMD ["npm", "run", "dev", "--", "--host"]
+# CRA uses 3000 by default
+EXPOSE 3000
+
+CMD ["npm", "start"]

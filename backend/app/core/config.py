@@ -17,6 +17,15 @@ class Settings(BaseSettings):
     MINIO_ROOT_PASSWORD: str = Field(..., env="MINIO_ROOT_PASSWORD")
     MINIO_BUCKET_NAME: str = Field(..., env="MINIO_BUCKET_NAME")
 
+    # Google OAuth
+    GOOGLE_CLIENT_ID: str = Field(..., env="GOOGLE_CLIENT_ID")
+    GOOGLE_CLIENT_SECRET: str = Field(..., env="GOOGLE_CLIENT_SECRET")
+    
+    # Security
+    SECRET_KEY: str = Field(..., env="SECRET_KEY")
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+
     # Look for .env in current dir, or parent dir (backend), or root dir
     model_config = SettingsConfigDict(
         env_file=[".env", "../.env", "../../.env"], 

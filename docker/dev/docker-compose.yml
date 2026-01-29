@@ -46,13 +46,17 @@ services:
     build:
       context: ../../frontend
       dockerfile: ../docker/frontend/Dockerfile.dev
+    command: npm start
     volumes:
       - ../../frontend:/app
       - /app/node_modules
     ports:
-      - "5173:5173"
+      - "3000:3000"
     env_file:
       - ../../.env
+    environment:
+      - WATCHPACK_POLLING=true # Webpack polling for Windows/Docker
+      - CHOKIDAR_USEPOLLING=true # Ensure file changes are detected
     depends_on:
       - backend
     networks:

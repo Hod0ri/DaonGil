@@ -30,6 +30,7 @@ frontend/.env
 frontend/npm-debug.log*
 frontend/yarn-debug.log*
 frontend/yarn-error.log*
+*.timestamp-*
 
 # IDE
 .idea/
