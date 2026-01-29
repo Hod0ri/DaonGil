@@ -5,3 +5,7 @@ asyncpg
 pydantic-settings
 minio
 python-multipart
+google-auth
+pyjwt
+httpx
+requests

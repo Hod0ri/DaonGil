@@ -1,16 +1,80 @@
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  --color-primary: #FFD1DC; /* Pastel Pink */
+  --color-primary-dark: #FFB7C5;
+  --color-secondary: #FFF0F5; /* Lavender Blush */
+  --color-blue-soft: #A2D2FF; /* Pastel Blue */
+  --color-blue-dark: #8ECAFF;
+  --color-text: #2c3e50; /* Darker for better readability */
+  --color-text-light: #5d6d7e; /* Darker gray */
+  --color-white: #FFFFFF;
+  --color-shadow: rgba(0, 0, 0, 0.1);
+  --font-main: 'Gowun Dodum', sans-serif;
+  --radius-card: 16px;
+  --radius-button: 8px;
+}
+
+body.lang-ja {
+  --font-main: 'Noto Sans JP', 'Gowun Dodum', sans-serif;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
+  font-family: var(--font-main);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(-45deg, #FFD1DC, #FFF0F5, #A2D2FF, #E0F7FA);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
+  color: var(--color-text);
   min-height: 100vh;
+}
+
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+/* React Datepicker Customization */
+.react-datepicker-wrapper {
+  width: 100%;
+}
+.react-datepicker__input-container input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: var(--radius-button);
+  font-family: var(--font-main);
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+.react-datepicker__header {
+  background-color: var(--color-secondary);
+  border-bottom: 1px solid #eee;
+}
+.react-datepicker__day--selected {
+  background-color: var(--color-primary-dark) !important;
+  border-radius: 50%;
+}
+.react-datepicker__day--keyboard-selected {
+  background-color: var(--color-primary) !important;
+  border-radius: 50%;
+}
+
+/* Animation Utilities */
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
