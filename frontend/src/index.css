@@ -49,32 +49,22 @@ code {
 }
 .react-datepicker__input-container input {
   width: 100%;
-  padding: 12px;
+  padding: 0.8rem;
   border: 1px solid #ddd;
   border-radius: var(--radius-button);
-  font-family: var(--font-main);
   font-size: 1rem;
-  box-sizing: border-box;
+  font-family: var(--font-main);
 }
 .react-datepicker__header {
   background-color: var(--color-secondary);
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--color-primary-dark);
 }
-.react-datepicker__day--selected {
+.react-datepicker__day--selected, .react-datepicker__day--keyboard-selected {
   background-color: var(--color-primary-dark) !important;
-  border-radius: 50%;
-}
-.react-datepicker__day--keyboard-selected {
-  background-color: var(--color-primary) !important;
-  border-radius: 50%;
+  color: white !important;
 }
 
-/* Animation Utilities */
-.fade-in {
-  animation: fadeIn 0.5s ease-in;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+/* Ensure DatePicker appears above modals */
+.react-datepicker-popper {
+  z-index: 9999 !important;
 }

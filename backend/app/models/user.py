@@ -15,6 +15,8 @@ class User(Base):
     # Profile fields
     birthdate = Column(Date, nullable=True)
     gender = Column(String, nullable=True)  # 'M' or 'F' or 'O'
+    emoji = Column(String, nullable=True)
+    first_meeting_date = Column(Date, nullable=True)
     
     # Couple Logic
     personal_code = Column(String, unique=True, index=True, nullable=True)

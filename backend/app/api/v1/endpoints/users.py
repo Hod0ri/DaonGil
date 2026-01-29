@@ -44,12 +44,15 @@ class UserUpdate(BaseModel):
     birthdate: Optional[date] = None
     gender: Optional[str] = None
     partner_code: Optional[str] = None
+    emoji: Optional[str] = None
+    first_meeting_date: Optional[date] = None
 
 class PartnerResponse(BaseModel):
     nickname: Optional[str]
     birthdate: Optional[date]
     gender: Optional[str]
     profile_image: Optional[str]
+    emoji: Optional[str]
 
 class UserResponse(BaseModel):
     id: int
@@ -59,6 +62,8 @@ class UserResponse(BaseModel):
     birthdate: Optional[date]
     gender: Optional[str]
     personal_code: Optional[str]
+    emoji: Optional[str]
+    first_meeting_date: Optional[date]
     partner: Optional[PartnerResponse] = None
 
     class Config:
@@ -92,7 +97,8 @@ async def read_users_me(
                 nickname=partner_user.nickname,
                 birthdate=partner_user.birthdate,
                 gender=partner_user.gender,
-                profile_image=partner_user.profile_image
+                profile_image=partner_user.profile_image,
+                emoji=partner_user.emoji
             )
 
     return UserResponse(
@@ -103,6 +109,8 @@ async def read_users_me(
         birthdate=current_user.birthdate,
         gender=current_user.gender,
         personal_code=current_user.personal_code,
+        emoji=current_user.emoji,
+        first_meeting_date=current_user.first_meeting_date,
         partner=partner_data
     )
 
@@ -120,8 +128,15 @@ async def disconnect_partner(
 
     # Disconnect both sides
     current_user.partner_id = None
+    # Reset couple data
+    current_user.emoji = None
+    current_user.first_meeting_date = None
+
     if partner:
         partner.partner_id = None
+        # Reset couple data for partner too
+        partner.emoji = None
+        partner.first_meeting_date = None
         db.add(partner)
     
     db.add(current_user)
@@ -130,7 +145,7 @@ async def disconnect_partner(
     
     return {"message": "Disconnected successfully"}
 
-@router.patch("/me")
+@router.patch("/me", response_model=UserResponse)
 async def update_user_me(
     user_update: UserUpdate,
     current_user: User = Depends(get_current_user),
@@ -144,6 +159,17 @@ async def update_user_me(
         current_user.birthdate = user_update.birthdate
     if user_update.gender is not None:
         current_user.gender = user_update.gender
+    if user_update.emoji is not None:
+        current_user.emoji = user_update.emoji
+    if user_update.first_meeting_date is not None:
+        current_user.first_meeting_date = user_update.first_meeting_date
+        # Sync with partner if connected
+        if current_user.partner_id:
+            result = await db.execute(select(User).filter(User.id == current_user.partner_id))
+            partner = result.scalars().first()
+            if partner:
+                partner.first_meeting_date = user_update.first_meeting_date
+                db.add(partner)
         
     # Handle Partner Connection
     if user_update.partner_code:
@@ -172,4 +198,30 @@ async def update_user_me(
     db.add(current_user)
     await db.commit()
     await db.refresh(current_user)
-    return current_user
+    
+    # Prepare response
+    partner_data = None
+    if current_user.partner_id:
+        result = await db.execute(select(User).filter(User.id == current_user.partner_id))
+        partner_user = result.scalars().first()
+        if partner_user:
+            partner_data = PartnerResponse(
+                nickname=partner_user.nickname,
+                birthdate=partner_user.birthdate,
+                gender=partner_user.gender,
+                profile_image=partner_user.profile_image,
+                emoji=partner_user.emoji
+            )
+
+    return UserResponse(
+        id=current_user.id,
+        email=current_user.email,
+        nickname=current_user.nickname,
+        profile_image=current_user.profile_image,
+        birthdate=current_user.birthdate,
+        gender=current_user.gender,
+        personal_code=current_user.personal_code,
+        emoji=current_user.emoji,
+        first_meeting_date=current_user.first_meeting_date,
+        partner=partner_data
+    )
