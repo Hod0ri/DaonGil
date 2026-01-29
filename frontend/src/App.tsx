@@ -6,6 +6,7 @@ import { motion } from 'framer-motion'
 import ProfileSetup from './components/ProfileSetup'
 import Logo from './components/Logo'
 import MyPage from './components/MyPage'
+import NaverMap from './components/Map'
 import './App.css'
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
@@ -165,10 +166,25 @@ function App() {
             <MyPage user={user} onUpdateUser={setUser} />
           ) : (
             <div className="card" style={{ maxWidth: '100%', textAlign: 'left', marginTop: '2rem' }}>
-              <h2>{t('welcome')}</h2>
-              <p>{t('app_subtitle')}</p>
-              <div style={{ marginTop: '2rem', padding: '2rem', background: '#f9f9f9', borderRadius: '8px', textAlign: 'center' }}>
-                <p>{t('map_feature_pending')}</p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <div>
+                  <h2 style={{ marginBottom: '0.5rem' }}>{t('welcome')}</h2>
+                  <p style={{ color: '#666' }}>{t('app_subtitle')}</p>
+                </div>
+                <div style={{ 
+                  backgroundColor: '#FFF0F5', 
+                  padding: '0.5rem 1rem', 
+                  borderRadius: '20px', 
+                  color: '#d65a7a', 
+                  fontSize: '0.9rem',
+                  fontWeight: 'bold'
+                }}>
+                  Day 1
+                </div>
+              </div>
+              
+              <div style={{ marginTop: '1rem' }}>
+                <NaverMap />
               </div>
             </div>
           )}
