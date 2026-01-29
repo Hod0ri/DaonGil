@@ -1,0 +1,38 @@
+# General
+.env
+.DS_Store
+Thumbs.db
+
+# Python / Backend
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.coverage
+.tox/
+.pytest_cache/
+backend/.env
+
+# Node / Frontend
+node_modules/
+dist/
+build/
+coverage/
+.npm
+.yarn
+frontend/.env
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo

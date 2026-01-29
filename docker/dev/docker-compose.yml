@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    env_file:
+      - ../../.env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - couple-network
+
+  minio:
+    image: minio/minio
+    command: server /data --console-address ":9001"
+    env_file:
+      - ../../.env
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    networks:
+      - couple-network
+
+  backend:
+    build:
+      context: ../../backend
+      dockerfile: ../docker/backend/Dockerfile.dev
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ../../backend:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - ../../.env
+    depends_on:
+      - db
+      - minio
+    networks:
+      - couple-network
+
+  frontend:
+    build:
+      context: ../../frontend
+      dockerfile: ../docker/frontend/Dockerfile.dev
+    volumes:
+      - ../../frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    env_file:
+      - ../../.env
+    depends_on:
+      - backend
+    networks:
+      - couple-network
+
+networks:
+  couple-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  minio_data:
