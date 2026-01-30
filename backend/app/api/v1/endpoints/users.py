@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy import or_
 from pydantic import BaseModel
 from typing import Optional
 from datetime import date
@@ -8,6 +9,8 @@ import random
 import string
 from app.db.session import get_db
 from app.models.user import User
+from app.models.place import Place, Memory
+from app.storage.client import delete_files
 from app.core.security import create_access_token
 from fastapi.security import OAuth2PasswordBearer
 import jwt
@@ -126,6 +129,42 @@ async def disconnect_partner(
     result = await db.execute(select(User).filter(User.id == current_user.partner_id))
     partner = result.scalars().first()
 
+    # --- DELETE SHARED DATA (Places, Memories, Images) ---
+    partner_id = partner.id if partner else -1
+    
+    # 1. Get all places IDs to be deleted (Owned by either user)
+    places_query = select(Place).filter(
+        or_(
+            Place.user_id == current_user.id,
+            Place.user_id == partner_id
+        )
+    )
+    result = await db.execute(places_query)
+    places_to_delete = result.scalars().all()
+    place_ids = [p.id for p in places_to_delete]
+    
+    if place_ids:
+        # 2. Get all memories in these places
+        memories_query = select(Memory).filter(Memory.place_id.in_(place_ids))
+        result = await db.execute(memories_query)
+        memories_to_delete = result.scalars().all()
+        
+        # 3. Collect image paths
+        images_to_delete = []
+        for memory in memories_to_delete:
+            if memory.images:
+                # memory.images is a list of strings (filenames)
+                images_to_delete.extend(memory.images)
+        
+        # 4. Delete from MinIO
+        if images_to_delete:
+            delete_files(images_to_delete)
+            
+        # 5. Delete places (Cascades to memories)
+        for place in places_to_delete:
+            await db.delete(place)
+    # -----------------------------------------------------
+
     # Disconnect both sides
     current_user.partner_id = None
     # Reset couple data
@@ -225,3 +264,46 @@ async def update_user_me(
         first_meeting_date=current_user.first_meeting_date,
         partner=partner_data
     )
+
+@router.get("/couple-stats")
+async def get_couple_stats(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    if not current_user.partner_id:
+        return {"places": 0, "memories": 0, "images": 0}
+        
+    partner_id = current_user.partner_id
+    
+    # 1. Count Places (Owned by either user)
+    places_query = select(Place).filter(
+        or_(
+            Place.user_id == current_user.id,
+            Place.user_id == partner_id
+        )
+    )
+    result = await db.execute(places_query)
+    places = result.scalars().all()
+    place_count = len(places)
+    place_ids = [p.id for p in places]
+    
+    memory_count = 0
+    image_count = 0
+    
+    if place_ids:
+        # 2. Count Memories
+        memories_query = select(Memory).filter(Memory.place_id.in_(place_ids))
+        result = await db.execute(memories_query)
+        memories = result.scalars().all()
+        memory_count = len(memories)
+        
+        # 3. Count Images
+        for memory in memories:
+            if memory.images:
+                image_count += len(memory.images)
+                
+    return {
+        "places": place_count,
+        "memories": memory_count,
+        "images": image_count
+    }

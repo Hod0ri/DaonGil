@@ -38,12 +38,12 @@ p {
   gap: 1.5rem;
   border: 1px solid rgba(0, 0, 0, 0.05);
   /* backdrop-filter removed since background is solid */
-  transition: transform 0.3s ease;
 }
 
-.card:hover {
+/* Removed hover transform for cards as it causes jittering in modals */
+/* .card:hover {
   transform: translateY(-2px);
-}
+} */
 
 .btn-primary {
   background-color: var(--color-primary);
