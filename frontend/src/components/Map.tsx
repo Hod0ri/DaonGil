@@ -1,14 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Place, PlaceCreate, getPlaces, createPlace, createMemory, MemoryCreate, deletePlace } from '../api/places';
+import { Place, PlaceCreate, createPlace, createMemory, MemoryCreate, deletePlace } from '../api/places';
 import PlaceCreateModal from './PlaceCreateModal';
 import PlaceDetailModal from './PlaceDetailModal';
+import { useMapContext } from '../contexts/MapContext';
 
 const NaverMap = () => {
   const { t } = useTranslation();
+  const { places, refreshPlaces, focusedLocation, tempPin, setTempPin } = useMapContext();
   const mapElement = useRef<HTMLDivElement | null>(null);
   const mapInstance = useRef<any>(null);
-  const [places, setPlaces] = useState<Place[]>([]);
   const [isSelectingLocation, setIsSelectingLocation] = useState(false);
   
   // Modals
@@ -21,17 +22,7 @@ const NaverMap = () => {
   const [tempMarker, setTempMarker] = useState<any>(null);
   const markersRef = useRef<any[]>([]);
 
-  const fetchPlaces = async () => {
-      const token = localStorage.getItem('token');
-      if (token) {
-          try {
-              const data = await getPlaces(token);
-              setPlaces(data);
-          } catch (e) {
-              console.error("Failed to fetch places", e);
-          }
-      }
-  };
+  // Removed local fetchPlaces, use refreshPlaces from context
 
   useEffect(() => {
     const { naver } = window as any;
@@ -82,9 +73,62 @@ const NaverMap = () => {
             mapInstance.current.isSelectingLocation = false;
         }
     });
-    
-    fetchPlaces();
   }, []);
+
+  useEffect(() => {
+    refreshPlaces();
+  }, [refreshPlaces]);
+
+  // Handle Temp Pin from Context (Search Address)
+  useEffect(() => {
+    const { naver } = window as any;
+    let marker: any = null;
+
+    if (mapInstance.current && naver && tempPin) {
+        marker = new naver.maps.Marker({
+            position: new naver.maps.LatLng(tempPin.lat, tempPin.lng),
+            map: mapInstance.current,
+            icon: {
+                content: '<div style="width: 24px; height: 24px; background: #FF5733; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 8px rgba(0,0,0,0.5); cursor: pointer; display: flex; justify-content: center; align-items: center; color: white; font-size: 14px;">+</div>',
+                anchor: new naver.maps.Point(12, 12)
+            },
+            animation: naver.maps.Animation.BOUNCE,
+            draggable: true
+        });
+
+        naver.maps.Event.addListener(marker, 'click', () => {
+            const position = marker.getPosition();
+            setNewLocation({ lat: position.y, lng: position.x });
+            setCreateModalOpen(true);
+        });
+        
+        // Stop bounce on drag start
+        naver.maps.Event.addListener(marker, 'dragstart', () => {
+            marker.setAnimation(null);
+        });
+    }
+
+    return () => {
+        if (marker) {
+            marker.setMap(null);
+        }
+    };
+  }, [tempPin]);
+
+  // Handle Focus from Context
+  useEffect(() => {
+    const { naver } = window as any;
+    if (mapInstance.current && focusedLocation && naver) {
+      const { lat, lng, zoom } = focusedLocation;
+      const newCenter = new naver.maps.LatLng(lat, lng);
+      
+      mapInstance.current.panTo(newCenter);
+      
+      if (zoom) {
+          mapInstance.current.setZoom(zoom);
+      }
+    }
+  }, [focusedLocation]);
 
   // Update markers when places change
   useEffect(() => {
@@ -163,11 +207,14 @@ const NaverMap = () => {
       if (token) {
           try {
               await createPlace(token, placeData);
-              await fetchPlaces();
+              await refreshPlaces();
               setCreateModalOpen(false);
               if (tempMarker) {
                   tempMarker.setMap(null);
                   setTempMarker(null);
+              }
+              if (tempPin) {
+                  setTempPin(null);
               }
           } catch (e) {
               console.error("Failed to create place", e);
@@ -189,25 +236,26 @@ const NaverMap = () => {
               };
               setSelectedPlace(updatedPlace);
               
-              // Also update in places list
-              setPlaces(places.map(p => p.id === selectedPlace.id ? updatedPlace : p));
+              // Refresh all places to keep context in sync
+              await refreshPlaces();
           } catch (e) {
               console.error("Failed to add memory", e);
           }
       }
   };
-  
-  const handleDeletePlace = async () => {
-      if (!selectedPlace) return;
+
+  const handleDeletePlace = async (placeId: number) => {
       const token = localStorage.getItem('token');
       if (token) {
-          try {
-              await deletePlace(token, selectedPlace.id);
-              await fetchPlaces();
-              setDetailModalOpen(false);
-              setSelectedPlace(null);
-          } catch (e) {
-              console.error("Failed to delete place", e);
+          if (window.confirm(t('confirm_delete'))) {
+              try {
+                  await deletePlace(token, placeId);
+                  await refreshPlaces();
+                  setDetailModalOpen(false);
+                  setSelectedPlace(null);
+              } catch (e) {
+                  console.error("Failed to delete place", e);
+              }
           }
       }
   };
@@ -243,16 +291,10 @@ const NaverMap = () => {
   };
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '500px' }}>
+    <div className="map-container">
       <div 
         ref={mapElement} 
-        style={{ 
-          width: '100%', 
-          height: '100%', 
-          borderRadius: '16px',
-          overflow: 'hidden',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1)' 
-        }} 
+        className="map-element"
       />
       
       {/* Add Button */}
@@ -278,6 +320,7 @@ const NaverMap = () => {
             transition: 'all 0.3s ease'
         }}
         title={t('places.add_place')}
+        aria-label={isSelectingLocation ? t('common.cancel', 'Cancel') : t('places.add_place', 'Add Place')}
       >
         {isSelectingLocation ? '✕' : '+'}
       </button>
@@ -313,10 +356,13 @@ const NaverMap = () => {
       {selectedPlace && (
           <PlaceDetailModal
             isOpen={detailModalOpen}
-            onClose={() => setDetailModalOpen(false)}
+            onClose={() => {
+              setDetailModalOpen(false);
+              setSelectedPlace(null);
+            }}
             place={selectedPlace}
             onAddMemory={handleAddMemory}
-            onDeletePlace={handleDeletePlace}
+            onDeletePlace={() => handleDeletePlace(selectedPlace.id)}
           />
       )}
     </div>

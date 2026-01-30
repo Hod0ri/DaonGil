@@ -39,7 +39,7 @@ async def get_current_user(
     return user
 
 def generate_personal_code(length=8):
-    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=length))
+    return ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(length))
 
 class UserUpdate(BaseModel):
     nickname: Optional[str] = None
@@ -183,6 +183,49 @@ async def disconnect_partner(
     await db.refresh(current_user)
     
     return {"message": "Disconnected successfully"}
+
+@router.delete("/me", status_code=204)
+async def delete_user_me(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Delete current user account.
+    Only allowed if not connected to a partner.
+    Deletes all related data (places, memories, notifications).
+    """
+    if current_user.partner_id is not None:
+        raise HTTPException(
+            status_code=400, 
+            detail="Cannot delete account while connected to a partner. Please disconnect first."
+        )
+
+    # 1. Delete Notifications (recipient is user)
+    # We need to import Notification model
+    from app.models.notification import Notification
+    await db.execute(
+        select(Notification).filter(Notification.recipient_id == current_user.id).execution_options(synchronize_session=False)
+    )
+    # Actually delete statement
+    from sqlalchemy import delete
+    await db.execute(delete(Notification).where(Notification.recipient_id == current_user.id))
+
+    # 2. Delete Memories created by user
+    # Note: Memories are cascaded from Place if place is deleted?
+    # But if user created memory in partner's place (if shared logic exists), we should delete them too.
+    # Currently Place has user_id, Memory has user_id.
+    await db.execute(delete(Memory).where(Memory.user_id == current_user.id))
+
+    # 3. Delete Places created by user
+    # This will cascade delete memories attached to these places due to relationship cascade
+    # (assuming Place.memories has cascade="all, delete-orphan")
+    await db.execute(delete(Place).where(Place.user_id == current_user.id))
+
+    # 4. Delete User
+    await db.delete(current_user)
+    await db.commit()
+    
+    return None
 
 @router.patch("/me", response_model=UserResponse)
 async def update_user_me(

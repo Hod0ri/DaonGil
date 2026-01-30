@@ -85,5 +85,37 @@
   "disconnect_stats_intro": "今まで{{name}}様と共に過ごした思い出は",
   "stats_places": "場所",
   "stats_memories": "思い出",
-  "stats_photos": "写真"
+  "stats_photos": "写真",
+  "footer": {
+    "privacy": "プライバシーポリシー",
+    "terms": "利用規約",
+    "contact": "お問い合わせ"
+  },
+  "notifications": {
+    "title": "通知",
+    "empty": "通知なし",
+    "delete": "削除"
+  },
+  "account_management": "アカウント管理",
+  "delete_account": "会員退会",
+  "disconnect_first_hint": "パートナーとの連携を解除した後、退会できます。",
+  "error_disconnect_first": "パートナーと連携中の状態では退会できません。先に連携を解除してください。",
+  "confirm_delete_account": "本当に退会しますか？ 退会するとすべてのデータが削除され、復元できません。",
+  "confirm_delete_account_final": "退会するとすべての思い出と情報が永久に消えます。本当によろしいですか？",
+  "error_delete_account": "会員退会に失敗しました。",
+  "contact": {
+    "description": "サービス利用中にご不明な点がございましたら、以下のメールアドレスまでお問い合わせください。",
+    "send_email": "メールで問い合わせる"
+  },
+  "search_placeholder": "場所検索 (名前, 住所)",
+  "search_address_placeholder": "住所検索 (例: 新宿区 1-2-3)",
+  "search_mode_places": "ピン検索",
+  "search_mode_address": "住所検索",
+  "account_management": "アカウント管理",
+  "delete_account": "退会する",
+  "disconnect_first_hint": "パートナーとの連携を解除してから退会できます。",
+  "error_disconnect_first": "パートナーと連携中は退会できません。先に連携を解除してください。",
+  "confirm_delete_account": "本当に退会しますか？退会するとすべてのデータが削除され、復元できません。",
+  "confirm_delete_account_final": "退会するとすべての思い出と情報が永久に削除されます。本当によろしいですか？",
+  "error_delete_account": "退会処理に失敗しました。"
 }

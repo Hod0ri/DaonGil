@@ -80,10 +80,42 @@
   "stats_places": "Places",
   "stats_memories": "Memories",
   "stats_photos": "Photos",
+  "footer": {
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "contact": "Contact Us"
+  },
   "disconnect_terms_title": "Disconnection Terms",
   "disconnect_terms_content": "1. Disconnection cannot be undone.\n2. All shared journeys and data will be permanently deleted immediately upon disconnection.\n3. Deleted data cannot be recovered under any circumstances.",
   "disconnect_agreement": "I have read and agree to the above.",
   "disconnect_input_guide": "Type the phrase below to confirm.",
   "disconnect_verification_phrase": "I will disconnect from my partner",
-  "disconnect_confirm_action": "Disconnect"
+  "disconnect_confirm_action": "Disconnect",
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications",
+    "delete": "Delete"
+  },
+  "account_management": "Account Management",
+  "delete_account": "Delete Account",
+  "disconnect_first_hint": "You can delete your account after disconnecting from your partner.",
+  "error_disconnect_first": "You cannot delete your account while connected to a partner. Please disconnect first.",
+  "confirm_delete_account": "Are you sure you want to delete your account? All data will be permanently deleted and cannot be recovered.",
+  "confirm_delete_account_final": "Deleting your account will permanently erase all memories and information. Are you really sure?",
+  "error_delete_account": "Failed to delete account.",
+  "contact": {
+    "description": "If you have any questions while using the service, please contact us at the email below.",
+    "send_email": "Send Email"
+  },
+  "search_placeholder": "Search places (name, address)",
+  "search_address_placeholder": "Search address (e.g. 123 Main St)",
+  "search_mode_places": "Pins",
+  "search_mode_address": "Address",
+  "account_management": "Account Management",
+  "delete_account": "Delete Account",
+  "disconnect_first_hint": "You must disconnect from your partner before deleting your account.",
+  "error_disconnect_first": "Cannot delete account while connected. Please disconnect first.",
+  "confirm_delete_account": "Are you sure you want to delete your account? All data will be deleted and cannot be recovered.",
+  "confirm_delete_account_final": "This action will permanently delete all your memories and data. Are you absolutely sure?",
+  "error_delete_account": "Failed to delete account."
 }

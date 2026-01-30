@@ -26,6 +26,10 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
+    # Redis
+    REDIS_HOST: str = Field("redis", env="REDIS_HOST")
+    REDIS_PORT: int = Field(6379, env="REDIS_PORT")
+
     # Look for .env in current dir, or parent dir (backend), or root dir
     model_config = SettingsConfigDict(
         env_file=[".env", "../.env", "../../.env"], 

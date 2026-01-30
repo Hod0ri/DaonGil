@@ -85,5 +85,37 @@
   "disconnect_stats_intro": "Recuerdos con {{name}} hasta ahora:",
   "stats_places": "Lugares",
   "stats_memories": "Recuerdos",
-  "stats_photos": "Fotos"
+  "stats_photos": "Fotos",
+  "footer": {
+    "privacy": "Política de Privacidad",
+    "terms": "Términos de Servicio",
+    "contact": "Contáctenos"
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "empty": "Sin notificaciones",
+    "delete": "Borrar"
+  },
+  "account_management": "Gestión de cuenta",
+  "delete_account": "Eliminar cuenta",
+  "disconnect_first_hint": "Puedes eliminar tu cuenta después de desconectarte de tu pareja.",
+  "error_disconnect_first": "No puedes eliminar tu cuenta mientras estás conectado con una pareja. Por favor, desconéctate primero.",
+  "confirm_delete_account": "¿Estás seguro de que quieres eliminar tu cuenta? Todos los datos se eliminarán permanentemente y no se podrán recuperar.",
+  "confirm_delete_account_final": "Eliminar tu cuenta borrará permanentemente todos los recuerdos e información. ¿Estás realmente seguro?",
+  "error_delete_account": "Error al eliminar la cuenta.",
+  "contact": {
+    "description": "Si tiene alguna pregunta mientras utiliza el servicio, contáctenos en el correo electrónico a continuación.",
+    "send_email": "Enviar Correo"
+  },
+  "search_placeholder": "Buscar lugares (nombre, dirección)",
+  "search_address_placeholder": "Buscar dirección",
+  "search_mode_places": "Pines",
+  "search_mode_address": "Dirección",
+  "account_management": "Gestión de Cuenta",
+  "delete_account": "Eliminar Cuenta",
+  "disconnect_first_hint": "Debes desconectarte de tu pareja antes de eliminar tu cuenta.",
+  "error_disconnect_first": "No se puede eliminar la cuenta mientras estás conectado. Por favor, desconéctate primero.",
+  "confirm_delete_account": "¿Estás seguro de que quieres eliminar tu cuenta? Todos los datos serán eliminados y no se podrán recuperar.",
+  "confirm_delete_account_final": "Esta acción eliminará permanentemente todos tus recuerdos y datos. ¿Estás absolutamente seguro?",
+  "error_delete_account": "Error al eliminar la cuenta."
 }

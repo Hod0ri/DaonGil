@@ -11,6 +11,8 @@ from app.models.place import Place, Memory
 from app.models.user import User
 from app.api.v1.endpoints.users import get_current_user
 from app.storage.client import upload_file
+from app.core.socket import manager
+from app.api.v1.endpoints.notifications import create_notification
 
 router = APIRouter()
 
@@ -64,11 +66,13 @@ class PlaceResponse(BaseModel):
 
 @router.get("/", response_model=List[PlaceResponse])
 async def read_places(
+    q: Optional[str] = None,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
     """
     Get all places for the current user and their partner, including memories.
+    Optionally filter by name or address with 'q'.
     """
     query = select(Place).options(selectinload(Place.memories))
     
@@ -82,6 +86,15 @@ async def read_places(
     else:
         query = query.filter(Place.user_id == current_user.id)
     
+    if q:
+        search_term = f"%{q}%"
+        query = query.filter(
+            or_(
+                Place.name.ilike(search_term),
+                Place.address.ilike(search_term)
+            )
+        )
+
     result = await db.execute(query)
     places = result.scalars().all()
     return places
@@ -109,6 +122,21 @@ async def create_place(
     await db.refresh(new_place)
     # Eager load memories (empty) for schema consistency
     result = await db.execute(select(Place).options(selectinload(Place.memories)).filter(Place.id == new_place.id))
+    
+    # Notify partner
+    if current_user.partner_id:
+        try:
+            await create_notification(
+                db=db,
+                user_id=current_user.partner_id,
+                type="place_create",
+                title="새로운 장소!",
+                message=f"{current_user.nickname or '짝꿍'}님이 '{new_place.name}' 장소를 추가했어요.",
+                related_id=new_place.id
+            )
+        except Exception as e:
+            print(f"Failed to send notification: {e}")
+
     return result.scalars().first()
 
 @router.post("/{place_id}/memories", response_model=MemoryResponse)
@@ -163,6 +191,21 @@ async def create_memory(
     db.add(new_memory)
     await db.commit()
     await db.refresh(new_memory)
+
+    # Notify partner
+    if current_user.partner_id:
+        try:
+            await create_notification(
+                db=db,
+                user_id=current_user.partner_id,
+                type="memory_create",
+                title="새로운 추억!",
+                message=f"{current_user.nickname or '짝꿍'}님이 추억을 남겼어요.",
+                related_id=place_id
+            )
+        except Exception as e:
+            print(f"Failed to send notification: {e}")
+
     return new_memory
 
 @router.delete("/{place_id}")

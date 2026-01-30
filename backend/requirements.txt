@@ -9,3 +9,6 @@ google-auth
 pyjwt
 httpx
 requests
+redis
+bandit
+safety

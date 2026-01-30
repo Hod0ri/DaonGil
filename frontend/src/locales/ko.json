@@ -85,5 +85,37 @@
   "disconnect_stats_intro": "지금까지 {{name}}님과 함께한 추억은",
   "stats_places": "장소",
   "stats_memories": "추억",
-  "stats_photos": "사진"
+  "stats_photos": "사진",
+  "footer": {
+    "privacy": "개인정보처리방침",
+    "terms": "이용약관",
+    "contact": "문의하기"
+  },
+  "notifications": {
+    "title": "알림",
+    "empty": "알림이 없습니다",
+    "delete": "삭제"
+  },
+  "account_management": "계정 관리",
+  "delete_account": "회원 탈퇴",
+  "disconnect_first_hint": "파트너와 연결을 해제한 후 탈퇴할 수 있습니다.",
+  "error_disconnect_first": "파트너와 연결된 상태에서는 탈퇴할 수 없습니다. 먼저 연결을 해제해주세요.",
+  "confirm_delete_account": "정말 탈퇴하시겠습니까? 탈퇴 시 모든 데이터가 삭제되며 복구할 수 없습니다.",
+  "confirm_delete_account_final": "탈퇴하면 모든 추억과 정보가 영구적으로 사라집니다. 정말로 탈퇴하시겠습니까?",
+  "error_delete_account": "회원 탈퇴에 실패했습니다.",
+  "contact": {
+    "description": "서비스 이용 중 문의가 있으시면 아래 이메일로 연락해주세요.",
+    "send_email": "메일로 문의하기"
+  },
+  "search_placeholder": "장소 검색 (이름, 주소)",
+  "search_address_placeholder": "주소 검색 (예: 강남대로 123)",
+  "search_mode_places": "핀 검색",
+  "search_mode_address": "주소 검색",
+  "account_management": "계정 관리",
+  "delete_account": "회원 탈퇴",
+  "disconnect_first_hint": "파트너와 연결을 해제한 후 탈퇴할 수 있습니다.",
+  "error_disconnect_first": "파트너와 연결된 상태에서는 탈퇴할 수 없습니다. 먼저 연결을 해제해주세요.",
+  "confirm_delete_account": "정말 탈퇴하시겠습니까? 탈퇴 시 모든 데이터가 삭제되며 복구할 수 없습니다.",
+  "confirm_delete_account_final": "탈퇴하면 모든 추억과 정보가 영구적으로 사라집니다. 정말로 탈퇴하시겠습니까?",
+  "error_delete_account": "회원 탈퇴에 실패했습니다."
 }
