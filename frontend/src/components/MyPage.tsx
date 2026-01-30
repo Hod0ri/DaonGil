@@ -26,6 +26,9 @@ const MyPage: React.FC<MyPageProps> = ({ user, onUpdateUser }) => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showSaveSuccessModal, setShowSaveSuccessModal] = useState(false);
   const [showDisconnectSuccessModal, setShowDisconnectSuccessModal] = useState(false);
+  
+  // Couple Stats
+  const [coupleStats, setCoupleStats] = useState<{ places: number; memories: number; images: number } | null>(null);
 
   // Partner Settings State
   const [firstMeetingDate, setFirstMeetingDate] = useState<Date | null>(null);
@@ -106,8 +109,21 @@ const MyPage: React.FC<MyPageProps> = ({ user, onUpdateUser }) => {
   };
 
 
-  const handleConfirmYes = () => {
+  const handleConfirmYes = async () => {
     setShowConfirmModal(false);
+    
+    // Fetch stats before showing modal
+    try {
+        const token = localStorage.getItem('token');
+        const res = await axios.get(
+            'http://localhost:8000/api/v1/users/couple-stats',
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setCoupleStats(res.data);
+    } catch (err) {
+        console.error("Failed to fetch couple stats", err);
+    }
+    
     setShowDisconnectModal(true);
     setDisconnectInput('');
     setIsAgreed(false);
@@ -694,18 +710,32 @@ const MyPage: React.FC<MyPageProps> = ({ user, onUpdateUser }) => {
           justifyContent: 'center',
           zIndex: 1000
         }}>
-          <div className="card" style={{ maxWidth: '400px', width: '90%', textAlign: 'left' }}>
-            <h3 style={{ marginBottom: '1rem', color: 'var(--color-text)' }}>{t('disconnect_terms_title')}</h3>
+          <div className="card" style={{ maxWidth: '500px', width: '90%', maxHeight: '90vh', overflowY: 'auto' }}>
+            <h2 style={{ color: '#ff4444', marginTop: 0 }}>{t('disconnect_terms_title')}</h2>
             
-            <div style={{ 
-              backgroundColor: '#f9f9f9', 
-              padding: '1rem', 
-              borderRadius: '8px',
-              fontSize: '0.9rem',
-              color: '#666',
-              marginBottom: '1rem',
-              whiteSpace: 'pre-line'
-            }}>
+            {coupleStats && (
+                <div style={{ background: '#fff0f0', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem', textAlign: 'center' }}>
+                    <p style={{ margin: 0, fontWeight: 'bold', color: '#d32f2f' }}>
+                        {t('disconnect_stats_intro', { name: user.partner?.nickname || 'Partner' })}
+                    </p>
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', marginTop: '0.5rem' }}>
+                        <div>
+                            <span style={{ display: 'block', fontSize: '1.2rem', fontWeight: 'bold' }}>{coupleStats.places}</span>
+                            <span style={{ fontSize: '0.8rem', color: '#666' }}>{t('stats_places')}</span>
+                        </div>
+                        <div>
+                            <span style={{ display: 'block', fontSize: '1.2rem', fontWeight: 'bold' }}>{coupleStats.memories}</span>
+                            <span style={{ fontSize: '0.8rem', color: '#666' }}>{t('stats_memories')}</span>
+                        </div>
+                        <div>
+                            <span style={{ display: 'block', fontSize: '1.2rem', fontWeight: 'bold' }}>{coupleStats.images}</span>
+                            <span style={{ fontSize: '0.8rem', color: '#666' }}>{t('stats_photos')}</span>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div style={{ textAlign: 'left', marginBottom: '1.5rem', whiteSpace: 'pre-line', lineHeight: '1.5' }}>
               {t('disconnect_terms_content')}
             </div>
 
