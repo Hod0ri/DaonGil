@@ -26,24 +26,19 @@ const PlaceCreateModal: React.FC<PlaceCreateModalProps> = ({ isOpen, onClose, on
   const [currentLocation, setCurrentLocation] = useState<{lat: number, lng: number} | undefined>(location);
 
   // Sync mode and location when modal opens or location changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (isOpen) {
         if (location) {
             setMode('form');
             setCurrentLocation(location);
         } else {
-            // If we already have current location (e.g. from search), keep form, otherwise initial
-            // Actually, if location prop is undefined, it means we are starting fresh OR we just did a search inside the modal.
-            // But this component re-renders.
-            // If the parent passes undefined, we should reset unless we have internal state.
-            // Let's rely on internal state 'mode' mostly, but if 'location' prop comes in (from map selection), we switch to form.
-            if (!currentLocation) {
-                setMode('initial');
-                setName('');
-                setAddress('');
-                setTags('');
-                setColor(COLORS[0]);
-            }
+            if (mode === 'initial' && !currentLocation) {
+                 setName('');
+                 setAddress('');
+                 setTags('');
+                 setColor(COLORS[0]);
+             }
         }
     }
   }, [isOpen, location]);
@@ -56,16 +51,36 @@ const PlaceCreateModal: React.FC<PlaceCreateModalProps> = ({ isOpen, onClose, on
       }
   }, [location]);
 
+  // Reverse Geocoding to auto-fill address
+  useEffect(() => {
+      if (location && isOpen && mode === 'form') {
+          const { naver } = window as any;
+          if (naver && naver.maps && naver.maps.Service) {
+              naver.maps.Service.reverseGeocode({
+                  coords: new naver.maps.LatLng(location.lat, location.lng),
+              }, function(status: any, response: any) {
+                  if (status === naver.maps.Service.Status.OK) {
+                      const result = response.v2;
+                      if (result && result.address) {
+                          setAddress(result.address.jibunAddress || result.address.roadAddress);
+                      }
+                  }
+              });
+          }
+      }
+  }, [location, isOpen, mode]);
+
   if (!isOpen) return null;
 
   const handleCompletePostcode = (data: any) => {
       const fullAddress = data.address;
+      const roadAddress = data.roadAddress;
+      const jibunAddress = data.jibunAddress;
       const extraAddress = data.buildingName ? ` (${data.buildingName})` : '';
       const finalAddress = fullAddress + extraAddress;
       
       console.log('Daum Postcode Result:', data);
-      console.log('Searching Address for Geocode:', fullAddress);
-
+      
       setAddress(finalAddress);
       
       if (!fullAddress) {
@@ -74,27 +89,41 @@ const PlaceCreateModal: React.FC<PlaceCreateModalProps> = ({ isOpen, onClose, on
 
       const { naver } = window as any;
       if (naver && naver.maps && naver.maps.Service) {
-          naver.maps.Service.geocode({
-              query: fullAddress
-          }, function(status: any, response: any) {
-              if (status !== naver.maps.Service.Status.OK) {
-                  console.error('Geocode Error Status:', status);
-                  return alert(`Failed to find location. Status: ${status}\n\nPlease check if "Geocoding" API is enabled in Naver Cloud Console.`);
-              }
-              
-              if (response.v2.addresses.length > 0) {
-                  const result = response.v2.addresses[0];
-                  const lat = parseFloat(result.y);
-                  const lng = parseFloat(result.x);
-                  
-                  setCurrentLocation({ lat, lng });
-                  setMode('form');
-              } else {
-                  alert('No result found.');
-              }
-          });
+          
+          const searchGeocode = (query: string, retryQuery?: string) => {
+              naver.maps.Service.geocode({
+                  query: query
+              }, function(status: any, response: any) {
+                  if (status === naver.maps.Service.Status.OK && response.v2.addresses.length > 0) {
+                      const result = response.v2.addresses[0];
+                      const lat = parseFloat(result.y);
+                      const lng = parseFloat(result.x);
+                      
+                      console.log('Geocode Success:', lat, lng);
+                      setCurrentLocation({ lat, lng });
+                      setMode('form');
+                  } else {
+                      console.warn(`Geocode failed for query: ${query}`);
+                      if (retryQuery && retryQuery !== query) {
+                          console.log(`Retrying with: ${retryQuery}`);
+                          searchGeocode(retryQuery);
+                      } else {
+                          console.error('Geocode final failure');
+                          alert('No location found for this address. Please try selecting on map.');
+                      }
+                  }
+              });
+          };
+
+          // Try road address first, then jibun address as fallback
+          const primaryQuery = roadAddress || fullAddress;
+          const secondaryQuery = jibunAddress;
+
+          searchGeocode(primaryQuery, secondaryQuery);
+
       } else {
-          alert("Map service is loading... Please try again.");
+          console.error('Naver Maps Service not found');
+          alert("Map service is not fully loaded. Please refresh the page or try 'Select on Map'.");
       }
   };
 
@@ -157,7 +186,13 @@ const PlaceCreateModal: React.FC<PlaceCreateModalProps> = ({ isOpen, onClose, on
             <div>
                 <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem'}}>
                     <h3 style={{margin: 0}}>{t('places.search_address') || "주소 검색"}</h3>
-                    <button onClick={() => setMode('initial')} style={{background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer'}}>✕</button>
+                    <button 
+                        onClick={() => setMode('initial')} 
+                        style={{background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer'}}
+                        aria-label={t('common.close', 'Close')}
+                    >
+                        ✕
+                    </button>
                 </div>
                 <DaumPostcodeEmbed 
                     onComplete={handleCompletePostcode} 
@@ -202,6 +237,15 @@ const PlaceCreateModal: React.FC<PlaceCreateModalProps> = ({ isOpen, onClose, on
                         <div 
                             key={c} 
                             onClick={() => setColor(c)}
+                            role="button"
+                            tabIndex={0}
+                            aria-label={`Select color ${c}`}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    setColor(c);
+                                }
+                            }}
                             style={{
                                 width: '30px', 
                                 height: '30px', 

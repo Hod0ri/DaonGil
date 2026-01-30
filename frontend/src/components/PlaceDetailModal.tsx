@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import { Place, Memory, MemoryCreate } from '../api/places';
+import { Place, MemoryCreate } from '../api/places';
 
 interface PlaceDetailModalProps {
   isOpen: boolean;
@@ -79,6 +79,7 @@ const PlaceDetailModal: React.FC<PlaceDetailModalProps> = ({ isOpen, onClose, pl
         <button 
             onClick={onClose} 
             style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: '#666' }}
+            aria-label={t('common.close', 'Close')}
         >
             &times;
         </button>

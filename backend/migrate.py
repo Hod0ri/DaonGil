@@ -57,6 +57,9 @@ async def execute_migration(url):
         print("Checking/Updating memories table schema...")
         await conn.execute(text("ALTER TABLE memories ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW()"))
         await conn.execute(text("ALTER TABLE memories ADD COLUMN IF NOT EXISTS images JSON DEFAULT '[]'"))
+
+        print("Checking/Updating notifications table schema...")
+        await conn.execute(text("ALTER TABLE notifications ADD COLUMN IF NOT EXISTS related_id INTEGER"))
         
         # 3. Clean up old columns from places if they exist (visit_dates, note) - Optional but good for hygiene
         # We won't drop them strictly to avoid data loss during dev, but we are moving to 'memories' table.

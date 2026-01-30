@@ -188,6 +188,37 @@ const MyPage: React.FC<MyPageProps> = ({ user, onUpdateUser }) => {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    if (user.partner) {
+      alert(t('error_disconnect_first'));
+      return;
+    }
+
+    if (!window.confirm(t('confirm_delete_account'))) {
+      return;
+    }
+
+    // 2nd Confirmation
+    if (!window.confirm(t('confirm_delete_account_final'))) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(
+        `${process.env.REACT_APP_API_URL || 'http://localhost:8000'}/api/v1/users/me`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      localStorage.removeItem('token');
+      window.location.href = '/'; 
+    } catch (err) {
+      console.error('Failed to delete account', err);
+      setError(t('error_delete_account'));
+      setLoading(false);
+    }
+  };
+
   return (
     <>
       {showConfirmModal && (
@@ -491,6 +522,34 @@ const MyPage: React.FC<MyPageProps> = ({ user, onUpdateUser }) => {
           </div>
         </section>
       )}
+
+      {/* Account Management */}
+      <div style={{ marginTop: '2rem', borderTop: '1px solid #eee', paddingTop: '1.5rem' }}>
+        <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem', color: '#e74c3c' }}>{t('account_management')}</h3>
+        <button 
+            onClick={handleDeleteAccount}
+            disabled={!!user.partner}
+            style={{
+                background: 'transparent',
+                border: '1px solid #e74c3c',
+                color: '#e74c3c',
+                padding: '0.8rem 1.2rem',
+                borderRadius: '8px',
+                width: '100%',
+                cursor: user.partner ? 'not-allowed' : 'pointer',
+                opacity: user.partner ? 0.5 : 1,
+                fontSize: '0.9rem',
+                fontWeight: 600
+            }}
+        >
+            {t('delete_account')}
+        </button>
+        {user.partner && (
+            <p style={{ fontSize: '0.8rem', color: '#999', marginTop: '0.5rem', textAlign: 'center' }}>
+                {t('disconnect_first_hint')}
+            </p>
+        )}
+      </div>
 
     </motion.div>
 

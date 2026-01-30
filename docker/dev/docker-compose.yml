@@ -25,6 +25,13 @@ services:
     networks:
       - couple-network
 
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - couple-network
+
   backend:
     build:
       context: ../../backend
@@ -39,6 +46,7 @@ services:
     depends_on:
       - db
       - minio
+      - redis
     networks:
       - couple-network
 
