@@ -32,5 +32,5 @@ Puede informar todas las quejas relacionadas con la protección de información 
 ### 7. Responsabilidad como Proveedor de Servicios Basados en Ubicación
 Este servicio incluye una función para almacenar y compartir la información de ubicación del usuario, y cumple con las leyes relativas a la protección y uso de la información de ubicación.
 
-**Fecha de Anuncio**: 1 de enero de 2024
-**Fecha de Vigencia**: 1 de enero de 2024
+**Fecha de Anuncio**: 31 de enero de 2026
+**Fecha de Vigencia**: 31 de enero de 2026

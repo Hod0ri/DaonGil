@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import client from '../api/client';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import DatePicker from 'react-datepicker';
@@ -60,12 +60,7 @@ const MyPage: React.FC<MyPageProps> = ({ user, onUpdateUser }) => {
     
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.patch(
-        'http://localhost:8000/api/v1/users/me',
-        { nickname: newNickname },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const res = await client.patch('/api/v1/users/me', { nickname: newNickname });
       onUpdateUser(res.data);
       setIsEditingNickname(false);
     } catch (err) {
@@ -83,12 +78,7 @@ const MyPage: React.FC<MyPageProps> = ({ user, onUpdateUser }) => {
     setLoading(true);
     setError('');
     try {
-      const token = localStorage.getItem('token');
-      const res = await axios.patch(
-        'http://localhost:8000/api/v1/users/me',
-        { partner_code: partnerCode },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const res = await client.patch('/api/v1/users/me', { partner_code: partnerCode });
       onUpdateUser(res.data);
       setPartnerCode('');
       setShowCoupleSetupModal(true); // Trigger setup modal
@@ -114,11 +104,7 @@ const MyPage: React.FC<MyPageProps> = ({ user, onUpdateUser }) => {
     
     // Fetch stats before showing modal
     try {
-        const token = localStorage.getItem('token');
-        const res = await axios.get(
-            'http://localhost:8000/api/v1/users/couple-stats',
-            { headers: { Authorization: `Bearer ${token}` } }
-        );
+        const res = await client.get('/api/v1/users/couple-stats');
         setCoupleStats(res.data);
     } catch (err) {
         console.error("Failed to fetch couple stats", err);
@@ -134,17 +120,10 @@ const MyPage: React.FC<MyPageProps> = ({ user, onUpdateUser }) => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      await axios.post(
-        'http://localhost:8000/api/v1/users/disconnect',
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await client.post('/api/v1/users/disconnect', {});
       
       // Refresh user data to clear partner info
-      const res = await axios.get(
-        'http://localhost:8000/api/v1/users/me',
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const res = await client.get('/api/v1/users/me');
       onUpdateUser(res.data);
       setShowDisconnectModal(false);
       setShowDisconnectSuccessModal(true);
@@ -170,11 +149,7 @@ const MyPage: React.FC<MyPageProps> = ({ user, onUpdateUser }) => {
         payload.first_meeting_date = localISOTime;
       }
       
-      const res = await axios.patch(
-        'http://localhost:8000/api/v1/users/me',
-        payload,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const res = await client.patch('/api/v1/users/me', payload);
       onUpdateUser(res.data);
       if (showCoupleSetupModal) {
         setShowCoupleSetupModal(false);
@@ -205,11 +180,7 @@ const MyPage: React.FC<MyPageProps> = ({ user, onUpdateUser }) => {
 
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      await axios.delete(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:8000'}/api/v1/users/me`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await client.delete('/api/v1/users/me');
       localStorage.removeItem('token');
       window.location.href = '/'; 
     } catch (err) {

@@ -40,4 +40,4 @@ El Servicio se esfuerza por proteger la información personal de los miembros se
 El Servicio está exento de responsabilidad por la prestación del servicio si no puede proporcionar el Servicio debido a desastres naturales o fuerza mayor equivalente a ello.
 
 **Disposición Suplementaria**
-Estos Términos entran en vigor a partir del 30 de enero de 2026.
+Estos Términos entran en vigor a partir del 31 de enero de 2026.

@@ -37,6 +37,9 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, []);
 
   useEffect(() => {
+    let socket: WebSocket | null = null;
+    let reconnectTimeout: NodeJS.Timeout;
+
     const connect = () => {
         const token = localStorage.getItem('token');
         if (!token) return;
@@ -45,23 +48,25 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         const apiHost = process.env.REACT_APP_API_URL 
             ? process.env.REACT_APP_API_URL.replace(/^http(s)?:\/\//, '')
             : 'localhost:8000';
-            
-        const wsUrl = `${protocol}//${apiHost}/api/v1/notifications/ws?token=${token}`;
-    
-        console.log('Connecting WS:', wsUrl);
         
-        const socket = new WebSocket(wsUrl);
+        const apiKey = process.env.REACT_APP_API_KEY || '';
+        const wsUrl = `${protocol}//${apiHost}/api/v1/notifications/ws?token=${token}&api_key=${apiKey}`;
+    
+        // Prevent multiple connections
+        if (ws.current?.readyState === WebSocket.OPEN || ws.current?.readyState === WebSocket.CONNECTING) {
+            return;
+        }
+
+        socket = new WebSocket(wsUrl);
         ws.current = socket;
     
         socket.onopen = () => {
-          console.log('WS Connected');
           setIsConnected(true);
         };
     
         socket.onmessage = (event) => {
           try {
             const data = JSON.parse(event.data);
-            console.log('WS Message:', data);
             if (data.type === 'NOTIFICATION' && data.payload) {
                // Show Toast
                setToast({
@@ -77,25 +82,32 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
                }
             }
           } catch (e) {
-            console.log('WS Message (Raw):', event.data);
           }
         };
-    
-        socket.onclose = () => {
-          console.log('WS Disconnected');
+
+        socket.onclose = (e) => {
           setIsConnected(false);
+          ws.current = null;
         };
     
         socket.onerror = (error) => {
             console.error('WS Error:', error);
+            // Optional: Reconnect logic could go here
         };
-    }
+    };
 
-    connect();
+    // Small delay to prevent double-invocation in Strict Mode
+    const timer = setTimeout(() => {
+        connect();
+    }, 100);
 
     return () => {
+      clearTimeout(timer);
       if (ws.current) {
-        ws.current.close();
+        // Only close if it's the same socket we created
+        if (ws.current === socket) {
+             ws.current.close();
+        }
       }
     };
   }, []);

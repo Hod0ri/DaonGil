@@ -10,7 +10,7 @@ const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose }) => {
   const { t } = useTranslation();
   if (!isOpen) return null;
 
-  const email = 'support@daongil.app';
+  const email = 'mintwlsehtro@gmail.com';
 
   return (
     <div

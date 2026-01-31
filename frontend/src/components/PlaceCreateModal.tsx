@@ -79,8 +79,6 @@ const PlaceCreateModal: React.FC<PlaceCreateModalProps> = ({ isOpen, onClose, on
       const extraAddress = data.buildingName ? ` (${data.buildingName})` : '';
       const finalAddress = fullAddress + extraAddress;
       
-      console.log('Daum Postcode Result:', data);
-      
       setAddress(finalAddress);
       
       if (!fullAddress) {
@@ -99,13 +97,11 @@ const PlaceCreateModal: React.FC<PlaceCreateModalProps> = ({ isOpen, onClose, on
                       const lat = parseFloat(result.y);
                       const lng = parseFloat(result.x);
                       
-                      console.log('Geocode Success:', lat, lng);
                       setCurrentLocation({ lat, lng });
                       setMode('form');
                   } else {
                       console.warn(`Geocode failed for query: ${query}`);
                       if (retryQuery && retryQuery !== query) {
-                          console.log(`Retrying with: ${retryQuery}`);
                           searchGeocode(retryQuery);
                       } else {
                           console.error('Geocode final failure');

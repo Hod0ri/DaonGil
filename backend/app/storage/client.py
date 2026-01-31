@@ -36,7 +36,19 @@ def ensure_bucket_exists():
 async def upload_file(file_data: bytes, filename: str, content_type: str) -> str:
     ensure_bucket_exists()
     
+    # 1. Validate File Size
+    if len(file_data) > MAX_FILE_SIZE:
+        raise ValueError(f"File size exceeds limit of {MAX_FILE_SIZE/1024/1024}MB")
+
+    # 2. Validate Content Type (MIME)
+    if content_type not in ALLOWED_MIME_TYPES:
+        raise ValueError(f"Unsupported file type: {content_type}. Allowed: {ALLOWED_MIME_TYPES}")
+    
     ext = filename.split('.')[-1] if '.' in filename else 'jpg'
+    # 3. Sanitize Extension (prevent malicious extensions if logic depended on it, though we use UUID)
+    if ext.lower() not in ["jpg", "jpeg", "png", "gif", "webp"]:
+        ext = "jpg" # Fallback to safe extension
+
     object_name = f"{uuid.uuid4()}.{ext}"
     
     minio_client.put_object(

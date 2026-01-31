@@ -3,40 +3,54 @@ version: '3.8'
 services:
   db:
     image: postgres:15-alpine
+    container_name: daongil-dev-db
     env_file:
       - ../../.env
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_dev_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     networks:
-      - couple-network
+      - dev-network
+    restart: unless-stopped
 
   minio:
     image: minio/minio
+    container_name: daongil-dev-minio
     command: server /data --console-address ":9001"
     env_file:
       - ../../.env
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
     volumes:
-      - minio_data:/data
+      - minio_dev_data:/data
     ports:
       - "9000:9000"
       - "9001:9001"
     networks:
-      - couple-network
+      - dev-network
+    restart: unless-stopped
 
   redis:
     image: redis:alpine
+    container_name: daongil-dev-redis
     ports:
       - "6379:6379"
     networks:
-      - couple-network
+      - dev-network
+    restart: unless-stopped
 
   backend:
+    container_name: daongil-dev-backend
     build:
       context: ../../backend
       dockerfile: ../docker/backend/Dockerfile.dev
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: sh -c "python migrate.py && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
     volumes:
       - ../../backend:/app
     ports:
@@ -48,9 +62,11 @@ services:
       - minio
       - redis
     networks:
-      - couple-network
+      - dev-network
+    restart: unless-stopped
 
   frontend:
+    container_name: daongil-dev-frontend
     build:
       context: ../../frontend
       dockerfile: ../docker/frontend/Dockerfile.dev
@@ -63,17 +79,19 @@ services:
     env_file:
       - ../../.env
     environment:
-      - WATCHPACK_POLLING=true # Webpack polling for Windows/Docker
-      - CHOKIDAR_USEPOLLING=true # Ensure file changes are detected
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
+      - WDS_SOCKET_PORT=0
     depends_on:
       - backend
     networks:
-      - couple-network
+      - dev-network
+    restart: unless-stopped
 
 networks:
-  couple-network:
+  dev-network:
     driver: bridge
 
 volumes:
-  postgres_data:
-  minio_data:
+  postgres_dev_data:
+  minio_dev_data:

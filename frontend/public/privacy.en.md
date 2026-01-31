@@ -25,3 +25,7 @@ Users can view or modify their registered personal information at any time and m
 
 ### 6. Contact Information for Privacy Protection Officer
 If you have any questions about personal information protection while using the Service, please contact the customer center.
+- **Email**: mintwlsehtro@gmail.com
+
+**Announcement Date**: January 31, 2026
+**Effective Date**: January 31, 2026

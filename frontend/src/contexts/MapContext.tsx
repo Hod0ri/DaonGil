@@ -11,6 +11,7 @@ interface MapContextType {
     searchAddress: (query: string) => Promise<any[]>;
     tempPin: { lat: number; lng: number; address: string; name: string } | null;
     setTempPin: (pin: { lat: number; lng: number; address: string; name: string } | null) => void;
+    isMapLoaded: boolean;
 }
 
 const MapContext = createContext<MapContextType | undefined>(undefined);
@@ -19,6 +20,33 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const [places, setPlaces] = useState<Place[]>([]);
     const [focusedLocation, setFocusedLocation] = useState<{ lat: number; lng: number; zoom?: number; timestamp: number } | null>(null);
     const [tempPin, setTempPin] = useState<{ lat: number; lng: number; address: string; name: string } | null>(null);
+    const [isMapLoaded, setIsMapLoaded] = useState(false);
+
+    useEffect(() => {
+        const scriptId = 'naver-map-script';
+        const existingScript = document.getElementById(scriptId);
+
+        if (existingScript) {
+            if ((window as any).naver && (window as any).naver.maps) {
+                setIsMapLoaded(true);
+            } else {
+                existingScript.addEventListener('load', () => setIsMapLoaded(true));
+            }
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.id = scriptId;
+        script.type = 'text/javascript';
+        script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${process.env.REACT_APP_NAVER_MAP_CLIENT_ID}&submodules=geocoder`;
+        script.async = true;
+        
+        script.onload = () => {
+            setIsMapLoaded(true);
+        };
+        
+        document.head.appendChild(script);
+    }, []);
 
     const refreshPlaces = useCallback(async () => {
         const token = localStorage.getItem('token');
@@ -81,7 +109,7 @@ export const MapProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }, []);
 
     return (
-        <MapContext.Provider value={{ places, refreshPlaces, focusedLocation, focusLocation, focusPlace, searchPlaces, searchAddress, tempPin, setTempPin }}>
+        <MapContext.Provider value={{ places, refreshPlaces, focusedLocation, focusLocation, focusPlace, searchPlaces, searchAddress, tempPin, setTempPin, isMapLoaded }}>
             {children}
         </MapContext.Provider>
     );

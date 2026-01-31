@@ -1,0 +1,21 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- White Background Circle for Contrast in Dark Mode -->
+  <circle cx="32" cy="32" r="30" fill="white" fill-opacity="0.9"/>
+  
+  <!-- Heart (Centered, Vivid Pink, Thicker) -->
+  <path 
+    d="M32 22 C 32 16, 44 16, 44 22 C 44 32, 32 38, 32 38 C 32 38, 20 32, 20 22 C 20 16, 32 16, 32 22 Z" 
+    fill="#FF4081" 
+    stroke="#FF4081"
+    stroke-width="2"
+    stroke-linejoin="round"
+  />
+  
+  <!-- Stylized Road/Path Segment below Heart (Darker, Thicker) -->
+  <path 
+    d="M14 44 C 26 44, 32 36, 32 36 S 46 44, 50 40" 
+    stroke="#4A90E2" 
+    stroke-width="5" 
+    stroke-linecap="round"
+  />
+</svg>

@@ -9,6 +9,10 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from app.core.config import settings
 from app.db.base import Base
+# Import all models so Base.metadata is populated
+from app.models.user import User
+from app.models.place import Place, Memory
+from app.models.notification import Notification
 
 async def run_migrations():
     print("Starting database migration...")
@@ -61,6 +65,9 @@ async def execute_migration(url):
         print("Checking/Updating notifications table schema...")
         await conn.execute(text("ALTER TABLE notifications ADD COLUMN IF NOT EXISTS related_id INTEGER"))
         
+        print("Checking/Updating users table for refresh token...")
+        await conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS refresh_token VARCHAR"))
+
         # 3. Clean up old columns from places if they exist (visit_dates, note) - Optional but good for hygiene
         # We won't drop them strictly to avoid data loss during dev, but we are moving to 'memories' table.
         # Actually, for this task, let's just make sure 'memories' table is created. create_all does that.

@@ -22,6 +22,8 @@ class User(Base):
     personal_code = Column(String, unique=True, index=True, nullable=True)
     partner_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     
+    refresh_token = Column(String, nullable=True)
+
     is_active = Column(Boolean, default=True)
     is_superuser = Column(Boolean, default=False)
 

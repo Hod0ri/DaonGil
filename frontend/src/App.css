@@ -1,3 +1,26 @@
+:root {
+  --color-primary: #FFD1DC; /* Pastel Pink */
+  --color-primary-dark: #FFB7C5;
+  --color-secondary: #FFF0F5; /* Lavender Blush */
+  --color-blue-soft: #A2D2FF; /* Pastel Blue */
+  --color-blue-dark: #8ECAFF;
+  --color-text: #2c3e50; /* Darker for better readability */
+  --color-text-light: #5d6d7e; /* Darker gray */
+  --color-white: #FFFFFF;
+  --color-shadow: rgba(0, 0, 0, 0.1);
+  --font-main: 'Gowun Dodum', sans-serif;
+  --radius-card: 16px;
+  --radius-button: 8px;
+}
+
+body.lang-ja {
+  --font-main: 'Noto Sans JP', 'Gowun Dodum', sans-serif;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 .App {
   text-align: center;
   min-height: 100vh;
@@ -5,6 +28,17 @@
   flex-direction: column;
   /* Prevent awkward word breaks in Korean */
   word-break: keep-all;
+  width: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+#root {
+  width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 h1 {
@@ -35,18 +69,17 @@ p {
   border-radius: var(--radius-card);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); /* Stronger shadow */
   width: 100%;
-  max-width: 450px;
+  /* max-width removed to allow full width on dashboard */
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
   border: 1px solid rgba(0, 0, 0, 0.05);
-  /* backdrop-filter removed since background is solid */
+  margin: 0 auto;
 }
 
-/* Removed hover transform for cards as it causes jittering in modals */
-/* .card:hover {
-  transform: translateY(-2px);
-} */
+.auth-card {
+  max-width: 520px;
+}
 
 .btn-primary {
   background-color: var(--color-primary);
@@ -122,6 +155,16 @@ p {
 }
 
 /* Header Component Styles */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  width: 100%;
+  max-width: 1400px; /* Constrain max width for large screens */
+  margin: 0 auto;
+}
+
 .header-right {
   display: flex;
   align-items: center;
@@ -312,8 +355,10 @@ p {
   flex-direction: column;
   justify-content: center;
   width: 100%;
+  max-width: 1000px; /* Constrain max width consistent with header */
   align-items: center;
   padding: 20px;
+  margin: 0 auto; /* Center the content */
 }
 
 .login-lang-switcher {
@@ -339,11 +384,58 @@ p {
   transform: scale(1.1);
 }
 
+/* Dashboard Header Styles */
 .dashboard-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
+}
+
+.welcome-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.welcome-title {
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.partner-info {
+  display: flex;
+  align-items: center;
+  margin-left: 0.5rem;
+  font-size: 1.5rem;
+}
+
+.day-counter {
+  background-color: #FFF0F5;
+  padding: 0.8rem 1.5rem;
+  border-radius: 24px;
+  color: #d65a7a;
+  font-size: 1.2rem;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(214, 90, 122, 0.2);
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.no-partner-badge {
+  background-color: #f8f9fa;
+  padding: 0.8rem 1.2rem;
+  border-radius: 12px;
+  color: #6c757d;
+  font-size: 0.9rem;
+  font-weight: bold;
+  border: 1px dashed #ced4da;
+  cursor: pointer;
+  white-space: nowrap;
 }
 
 .map-container {
@@ -399,146 +491,92 @@ p {
   }
 }
 
-/* Mobile Adjustments (Max Width 480px) */
+/* Mobile Specific Optimizations (320px - 480px) */
 @media (max-width: 480px) {
-  .app-content {
-    padding: 10px;
-  }
-  
-  .card {
-    padding: 1.25rem;
-    gap: 0.8rem;
-  }
-  
-  /* Header Mobile Layout */
   .app-header {
-    flex-wrap: wrap;
-    padding: 0.8rem;
-    gap: 0.5rem;
-    justify-content: center;
+    padding: 0.5rem 0.8rem;
+    flex-direction: column;
+    gap: 1rem;
   }
-  
-  .app-header > div:first-child {
-    /* Logo container */
-    margin-bottom: 0.5rem;
-  }
-  
-  .header-right {
-    width: 100%;
-    justify-content: space-between;
-    gap: 0.5rem;
-    background: rgba(255,255,255,0.5);
-    padding: 8px;
-    border-radius: 12px;
-  }
-  
-  /* Compact User Info */
-  .user-info-pill {
-    padding: 6px;
-    background: transparent;
-  }
-  
-  .user-info-pill span {
-    display: none; /* Hide text */
-  }
-  
-  .user-info-pill::before {
-    content: '👤';
-    font-size: 1.2rem;
-  }
-  
-  /* Compact Language Switcher */
-  .lang-switcher-mini button img {
-    width: 20px;
-  }
-  
-  .lang-switcher-mini {
-    padding: 2px;
-  }
-  
-  /* Compact Logout */
-  .btn-logout {
-    padding: 6px 12px;
-    font-size: 0.8rem;
-  }
-  
-  /* Dashboard Header Stacking */
+
   .dashboard-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.8rem;
+    gap: 1rem;
   }
   
-  .dashboard-header > div:last-child {
+  .welcome-title {
+    flex-direction: column; /* Stack "Welcome" and Partner info */
+    align-items: flex-start;
+    gap: 0.2rem;
+  }
+  
+  .partner-info {
+    margin-left: 0;
+    margin-top: 0.2rem;
+    font-size: 1.3rem;
+  }
+  
+  .day-counter {
+    align-self: flex-start; /* Align left with the text */
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+  }
+  
+  .no-partner-badge {
+    align-self: flex-start;
     width: 100%;
-    display: flex;
-    justify-content: center;
-  }
-  
-  /* Map Height */
-  .map-container {
-    height: 60vh;
-    min-height: 350px;
-  }
-  
-  /* Login Screen Adjustments */
-  .login-lang-switcher {
-    top: 0.5rem;
-    right: 0.5rem;
-  }
-  
-  .login-lang-switcher img {
-    width: 30px;
-  }
-  
-  h1 {
-    font-size: 1.5rem; /* Further reduce for small screens */
-    word-break: keep-all; /* Ensure korean words don't break weirdly */
+    text-align: center;
   }
 
-  h2 {
-    font-size: 1.2rem;
-    white-space: normal; /* Allow wrapping on very small screens so it's not cut off */
-    overflow: visible;
-    text-overflow: clip;
-  }
-  
-  .btn-primary, .btn-secondary {
-    white-space: normal; /* Allow text wrapping on buttons */
-    padding: 12px 16px; /* Reduce padding */
-    font-size: 0.95rem; /* Slightly smaller text */
-    height: auto; /* Allow height to grow with wrapped text */
-    line-height: 1.3; /* Better spacing for wrapped text */
-  }
-  
-  /* Mobile Notification Overlay */
-  .notification-dropdown {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+  .header-right {
+    gap: 0.5rem;
     width: 100%;
-    height: 100vh;
-    margin: 0;
-    border-radius: 0;
-    display: flex;
-    flex-direction: column;
-    animation: slideUp 0.3s ease-out;
+    justify-content: center;
   }
+
+  .notification-dropdown {
+    position: fixed; /* Use fixed positioning to prevent cutoff */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90vw;
+    max-width: 320px;
+    max-height: 80vh; /* Limit height */
+    right: auto;
+    margin-top: 0;
+    box-shadow: 0 0 100px rgba(0,0,0,0.5); /* Stronger shadow/dimming effect hint */
+    z-index: 2000;
+  }
+
+  /* Add a backdrop if possible, but purely CSS dropdowns are hard to backdrop without extra elements.
+     Just making it centered fixed modal-like is best for visibility. */
   
   .close-notifications-btn {
-    display: block;
-    padding: 8px;
+    display: block; /* Show close button on mobile */
+  }
+
+  .app-content {
+    padding: 0.5rem;
+  }
+
+
+  .user-info-pill {
+    padding: 6px 10px;
+    font-size: 0.8rem;
   }
   
-  .notification-list {
-    flex: 1;
-    max-height: none;
+  .user-info-pill span {
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
-  
-  @keyframes slideUp {
-    from { transform: translateY(100%); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+
+  .map-container {
+    height: 400px; /* Slightly shorter map on mobile */
+  }
+
+  h1 {
+    font-size: 1.75rem;
   }
 }

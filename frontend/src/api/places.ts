@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+import client from './client';
 
 export interface Memory {
   id: number;
@@ -47,16 +45,12 @@ export interface PlaceUpdate {
 }
 
 export const getPlaces = async (token: string): Promise<Place[]> => {
-  const response = await axios.get(`${API_URL}/api/v1/places/`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+  const response = await client.get('/api/v1/places/');
   return response.data;
 };
 
 export const createPlace = async (token: string, place: PlaceCreate): Promise<Place> => {
-  const response = await axios.post(`${API_URL}/api/v1/places/`, place, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+  const response = await client.post('/api/v1/places/', place);
   return response.data;
 };
 
@@ -72,9 +66,8 @@ export const createMemory = async (token: string, placeId: number, memory: Memor
     });
   }
 
-  const response = await axios.post(`${API_URL}/api/v1/places/${placeId}/memories`, formData, {
+  const response = await client.post(`/api/v1/places/${placeId}/memories`, formData, {
     headers: { 
-      Authorization: `Bearer ${token}`,
       'Content-Type': 'multipart/form-data'
     }
   });
@@ -82,14 +75,10 @@ export const createMemory = async (token: string, placeId: number, memory: Memor
 };
 
 export const updatePlace = async (token: string, id: number, place: PlaceUpdate): Promise<Place> => {
-  const response = await axios.put(`${API_URL}/api/v1/places/${id}`, place, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+  const response = await client.put(`/api/v1/places/${id}`, place);
   return response.data;
 };
 
 export const deletePlace = async (token: string, id: number): Promise<void> => {
-  await axios.delete(`${API_URL}/api/v1/places/${id}`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+  await client.delete(`/api/v1/places/${id}`);
 };

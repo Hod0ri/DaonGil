@@ -7,7 +7,7 @@ import { useMapContext } from '../contexts/MapContext';
 
 const NaverMap = () => {
   const { t } = useTranslation();
-  const { places, refreshPlaces, focusedLocation, tempPin, setTempPin } = useMapContext();
+  const { places, refreshPlaces, focusedLocation, tempPin, setTempPin, isMapLoaded } = useMapContext();
   const mapElement = useRef<HTMLDivElement | null>(null);
   const mapInstance = useRef<any>(null);
   const [isSelectingLocation, setIsSelectingLocation] = useState(false);
@@ -25,8 +25,12 @@ const NaverMap = () => {
   // Removed local fetchPlaces, use refreshPlaces from context
 
   useEffect(() => {
+    if (!isMapLoaded) return;
     const { naver } = window as any;
     if (!mapElement.current || !naver) return;
+    
+    // Prevent double initialization
+    if (mapInstance.current) return;
 
     // Map initialization
     const location = new naver.maps.LatLng(37.5666805, 126.9784147);
@@ -73,7 +77,7 @@ const NaverMap = () => {
             mapInstance.current.isSelectingLocation = false;
         }
     });
-  }, []);
+  }, [isMapLoaded]);
 
   useEffect(() => {
     refreshPlaces();
