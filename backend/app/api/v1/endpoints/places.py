@@ -171,9 +171,15 @@ async def create_memory(
     # Upload images
     image_urls = []
     for image in images:
-        content = await image.read()
-        url = await upload_file(content, image.filename, image.content_type)
-        image_urls.append(url)
+        try:
+            content = await image.read()
+            url = await upload_file(content, image.filename, image.content_type)
+            image_urls.append(url)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+        except Exception as e:
+            print(f"Upload failed: {e}")
+            raise HTTPException(status_code=500, detail="Image upload failed")
 
     # Convert visit_date string to date object
     try:

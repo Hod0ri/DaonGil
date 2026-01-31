@@ -1,6 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
+from app.api.deps import verify_api_key
 from app.storage.client import ensure_bucket_exists
 from app.core.cache import init_redis, close_redis
 from app.api.v1.api import api_router
@@ -11,11 +12,19 @@ app = FastAPI(title=settings.PROJECT_NAME)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # In production, replace with specific origins
+    allow_origins=settings.BACKEND_CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.middleware("http")
+async def add_security_headers(request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    return response
 
 @app.on_event("startup")
 async def startup_event():
@@ -29,7 +38,7 @@ async def startup_event():
 async def shutdown_event():
     await close_redis()
 
-app.include_router(api_router, prefix="/api/v1")
+app.include_router(api_router, prefix="/api/v1", dependencies=[Depends(verify_api_key)])
 
 @app.get("/")
 def read_root():

@@ -23,8 +23,23 @@ class Settings(BaseSettings):
     
     # Security
     SECRET_KEY: str = Field(..., env="SECRET_KEY")
+    API_KEY: str = Field(..., env="API_KEY")
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+    
+    # Environment
+    ENVIRONMENT: str = Field("local", env="ENVIRONMENT")
+    DOMAIN: str = Field("http://localhost", env="DOMAIN")
+    BACKEND_CORS_ORIGINS: list[str] = Field(
+        default=[
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "http://localhost",
+            "http://127.0.0.1"
+        ],
+        env="BACKEND_CORS_ORIGINS"
+    )
 
     # Redis
     REDIS_HOST: str = Field("redis", env="REDIS_HOST")

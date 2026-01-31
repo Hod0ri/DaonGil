@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import client from '../api/client';
 import { useTranslation } from 'react-i18next';
 import DatePicker from 'react-datepicker';
 import { ko, ja, es, enUS } from 'date-fns/locale';
@@ -98,13 +98,7 @@ const ProfileSetup: React.FC<ProfileSetupProps> = ({ onProfileComplete, initialN
         payload.partner_code = partnerCode.trim();
       }
 
-      const res = await axios.patch(
-        'http://localhost:8000/api/v1/users/me',
-        payload,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
+      const res = await client.patch('/api/v1/users/me', payload);
       onProfileComplete(res.data);
     } catch (err: any) {
       console.error('Profile update failed:', err);

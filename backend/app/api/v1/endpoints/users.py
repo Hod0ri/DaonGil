@@ -7,6 +7,7 @@ from typing import Optional
 from datetime import date
 import random
 import string
+import secrets
 from app.db.session import get_db
 from app.models.user import User
 from app.models.place import Place, Memory

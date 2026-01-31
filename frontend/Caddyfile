@@ -1,0 +1,24 @@
+:80 {
+    # Serve static files from /srv (copied from builder stage)
+    root * /srv
+    encode gzip
+
+    # API Reverse Proxy (points to 'backend' service in docker-compose)
+    handle /api/* {
+        reverse_proxy backend:8000
+    }
+
+    # Swagger UI & OpenAPI
+    handle /docs* {
+        reverse_proxy backend:8000
+    }
+    handle /openapi.json {
+        reverse_proxy backend:8000
+    }
+
+    # Serve static files
+    file_server
+
+    # SPA Routing (Catch-all for React Router)
+    try_files {path} /index.html
+}

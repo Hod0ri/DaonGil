@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
+import client from './api/client'
 import { GoogleLogin, CredentialResponse } from '@react-oauth/google'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
@@ -10,11 +11,10 @@ import MyPage from './components/MyPage'
 import NaverMap from './components/Map'
 import Footer from './components/Footer'
 import SearchBar from './components/SearchBar'
+import MarkdownPage from './components/MarkdownPage'
 import { WebSocketProvider } from './contexts/WebSocketContext'
 import { MapProvider } from './contexts/MapContext'
 import './App.css'
-
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 function App() {
   const { t, i18n } = useTranslation();
@@ -24,9 +24,7 @@ function App() {
 
   const fetchUser = async (token: string) => {
     try {
-      const res = await axios.get(`${API_URL}/api/v1/users/me`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await client.get('/api/v1/users/me');
       setUser(res.data);
     } catch (error) {
       console.error('Failed to fetch user:', error);
@@ -49,7 +47,7 @@ function App() {
   const handleLoginSuccess = async (credentialResponse: CredentialResponse) => {
     if (credentialResponse.credential) {
       try {
-        const res = await axios.post(`${API_URL}/api/v1/auth/login/google`, {
+        const res = await client.post('/api/v1/auth/login/google', {
           credential: credentialResponse.credential
         });
         const token = res.data.access_token;
@@ -90,9 +88,8 @@ function App() {
     return <div className="App">Loading...</div>;
   }
 
-  return (
-    <div className="App" style={{ justifyContent: 'space-between', paddingBottom: 0 }}>
-      <div className="app-content">
+  const MainContent = () => (
+    <div className="app-content">
       {!user ? (
         <>
         <div className="lang-switcher login-lang-switcher">
@@ -114,7 +111,7 @@ function App() {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
-          className="card"
+          className="card auth-card"
         >
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
             <Logo />
@@ -123,7 +120,7 @@ function App() {
           <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'center' }}>
             <GoogleLogin
               onSuccess={handleLoginSuccess}
-              onError={() => console.log('Login Failed')}
+              onError={() => {}}
             />
           </div>
         </motion.div>
@@ -156,10 +153,10 @@ function App() {
               ) : (
                 <div className="card" style={{ maxWidth: '100%', textAlign: 'left', marginTop: '2rem' }}>
                   <div className="dashboard-header">
-                    <div>
-                      <h2 style={{ marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div className="welcome-container">
+                      <h2 className="welcome-title">
                         {t('welcome')}
-                        <div style={{ display: 'flex', alignItems: 'center', marginLeft: '0.5rem', fontSize: '1.5rem' }}>
+                        <div className="partner-info">
                           <span>{user.emoji || '🙂'}</span>
                           {user.partner && (
                             <>
@@ -175,28 +172,11 @@ function App() {
                       <p style={{ color: '#666' }}>{t('app_subtitle')}</p>
                     </div>
                     {user.first_meeting_date ? (
-                      <div style={{ 
-                        backgroundColor: '#FFF0F5', 
-                        padding: '0.8rem 1.5rem', 
-                        borderRadius: '24px', 
-                        color: '#d65a7a', 
-                        fontSize: '1.2rem',
-                        fontWeight: 'bold',
-                        boxShadow: '0 2px 8px rgba(214, 90, 122, 0.2)'
-                      }}>
+                      <div className="day-counter">
                         Day {calculateDDay(user.first_meeting_date)}
                       </div>
                     ) : !user.partner ? (
-                      <div style={{
-                        backgroundColor: '#f8f9fa',
-                        padding: '0.8rem 1.2rem',
-                        borderRadius: '12px',
-                        color: '#6c757d',
-                        fontSize: '0.9rem',
-                        fontWeight: 'bold',
-                        border: '1px dashed #ced4da',
-                        cursor: 'pointer'
-                      }} onClick={() => setView('mypage')}>
+                      <div className="no-partner-badge" onClick={() => setView('mypage')}>
                         {t('no_partner_register')}
                       </div>
                     ) : null}
@@ -213,9 +193,20 @@ function App() {
           </MapProvider>
         </WebSocketProvider>
       )}
-      </div>
-      <Footer />
     </div>
+  );
+
+  return (
+    <Router>
+      <div className="App" style={{ justifyContent: 'space-between', paddingBottom: 0 }}>
+        <Routes>
+          <Route path="/privacy" element={<MarkdownPage filePath="/privacy" titleKey="footer.privacy" />} />
+          <Route path="/terms" element={<MarkdownPage filePath="/terms" titleKey="footer.terms" />} />
+          <Route path="*" element={<MainContent />} />
+        </Routes>
+        <Footer />
+      </div>
+    </Router>
   )
 }
 

@@ -40,4 +40,4 @@ The Service strives to protect members' personal information as stipulated by re
 The Service is exempted from liability for service provision if it cannot provide the Service due to natural disasters or force majeure equivalent thereto.
 
 **Supplementary Provision**
-These Terms are effective from January 30, 2026.
+These Terms are effective from January 31, 2026.
